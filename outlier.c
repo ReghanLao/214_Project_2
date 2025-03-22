@@ -1,6 +1,67 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <dirent.h>
+#include <string.h>
+
+int ends_with_txt(char *file_path) {
+  //extracts the last . and extension if it exists
+  char *extension = strrchr(file_path, '.');
+
+  //ensuring the file ends with .txt
+  if(extension != NULL && strcmp(extension, ".txt") == 0) {
+    return 1;
+  }
+
+  //file does not end with .txt
+  return 0;
+}
+
+void process_file(char *file_path) {
+  //TO BE DONE
+}
+
+void process_directory(char *directory_name) {
+  DIR *dir = opendir(directory_name);
+  if(dir == NULL) {
+    perror("Unable to open directory");
+    return;
+  }
+
+  //refers to an entry in the directory
+  struct dirent *dir_entry;
+
+  //while we have more entries to read
+  while((dir_entry = readdir(dir)) != NULL) {
+    // names beginning with a period (.) are ignored
+    if(dir_entry->d_name[0] == '.') {
+      continue;
+    }
+
+    //constructing pathnames for each file and/or directory encountered 
+    char file_path[1024];
+    snprintf(file_path, sizeof(file_path), "%s/%s", directory_name, dir_entry->d_name);
+
+    struct stat buffer;
+    if(stat(file_path, &buffer) == -1) {
+      perror("stat failed");
+      continue;
+    }
+
+    if(S_ISDIR(buffer.st_mode)) {
+      //directories are recursively traversed
+      process_directory(file_path);
+    }
+    else if(S_ISREG(buffer.st_mode)) {
+      //process regular files that ONLY end in .txt
+      if(ends_with_txt(file_path)) {
+        process_file(file_path);
+      }
+    }
+  }
+  
+  closedir(dir);
+}
 
 int main(int argc, char *argv[]) {
   if(argc < 2) {
@@ -13,7 +74,7 @@ int main(int argc, char *argv[]) {
     struct stat buffer;
 
     if(stat(argv[i], &buffer) == -1) {
-      perror("stat");
+      perror("stat failed");
       return 1;
     }
 
