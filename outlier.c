@@ -3,6 +3,7 @@
 #include <sys/stat.h>
 #include <dirent.h>
 #include <string.h>
+#include <fcntl.h>
 
 int ends_with_txt(char *file_path) {
   //extracts the last . and extension if it exists
@@ -17,8 +18,17 @@ int ends_with_txt(char *file_path) {
   return 0;
 }
 
-void process_file(char *file_path) {
+//process file and update word frequencies in the HashTable
+void process_file(char *file_path, HashTable *word_frequency) {
   //TO BE DONE
+  int fd = open(file_path, O_RDONLY);
+
+  if (fd == -1) {
+    perror("Error opening file");
+    return 1;
+  }
+
+
 }
 
 void process_directory(char *directory_name) {
