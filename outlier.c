@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <dirent.h>
-#include <string.h>
 #include <fcntl.h>
 
 #define TABLE_SIZE 6000  // size for our HashTable TBD
@@ -14,6 +14,10 @@ typedef struct WordEntry {
   struct WordEntry *next;
 } WordEntry;
 
+/*
+an array of pointers to WordEntry objects and each index in the array can have a 
+a linked list of WordEntry objects to handle collisions 
+*/
 typedef struct {
   WordEntry *table[TABLE_SIZE];
 } HashTable;
@@ -31,7 +35,39 @@ unsigned int hash(char *word) {
 
 //insert word into HashTable
 void insert_word(char *word, HashTable *hash_table) {
+  unsigned int index = hash(word);
 
+  WordEntry *entry = hash_table->table[index];
+
+  //checks if word already exists in our hashtable
+  while(entry != NULL) {
+    if(strcmp(entry->word, word) == 0) {
+      entry->count += 1;
+      return; 
+    }
+
+    entry = entry->next;
+  }
+
+  //word doesn't already exist in our hashtable so we have to insert 
+  entry = (WordEntry*)malloc(sizeof(WordEntry));
+  if (entry == NULL) {  
+    perror("Memory allocation failed");  
+    exit(EXIT_FAILURE);  
+  }
+
+  entry->word = malloc(strlen(word) + 1);  
+  if (entry->word == NULL) {  
+      perror("Memory allocation failed");  
+      exit(EXIT_FAILURE);  
+  }
+  
+  strcpy(entry->word, word);  
+  entry->count = 1;
+
+  //have new entry be the head of LL
+  entry->next = hash_table->table[index];
+  hash_table->table[index] = entry;
 }
 
 int ends_with_txt(char *file_path) {
