@@ -5,6 +5,35 @@
 #include <string.h>
 #include <fcntl.h>
 
+#define TABLE_SIZE 6000  // size for our HashTable TBD
+
+//represents an entry in the HashTable
+typedef struct WordEntry {
+  char *word; //key
+  int count; //value
+  struct WordEntry *next;
+} WordEntry;
+
+typedef struct {
+  WordEntry *table[TABLE_SIZE];
+} HashTable;
+
+//implement simple hash function
+unsigned int hash(char *word) {
+  unsigned int hash = 0;
+  while(*word) {
+    hash = (hash * 37) + *word;
+    word++;
+  }
+
+  return hash % TABLE_SIZE;
+}
+
+//insert word into HashTable
+void insert_word(char *word, HashTable *hash_table) {
+
+}
+
 int ends_with_txt(char *file_path) {
   //extracts the last . and extension if it exists
   char *extension = strrchr(file_path, '.');
@@ -19,19 +48,20 @@ int ends_with_txt(char *file_path) {
 }
 
 //process file and update word frequencies in the HashTable
-void process_file(char *file_path, HashTable *word_frequency) {
+void process_file(char *file_path, HashTable *hash_table) {
   //TO BE DONE
+
   int fd = open(file_path, O_RDONLY);
 
   if (fd == -1) {
     perror("Error opening file");
-    return 1;
+    return;
   }
 
 
 }
 
-void process_directory(char *directory_name) {
+void process_directory(char *directory_name, HashTable *hash_table) {
   DIR *dir = opendir(directory_name);
   if(dir == NULL) {
     perror("Unable to open directory");
@@ -60,12 +90,12 @@ void process_directory(char *directory_name) {
 
     if(S_ISDIR(buffer.st_mode)) {
       //directories are recursively traversed
-      process_directory(file_path);
+      process_directory(file_path, hash_table);
     }
     else if(S_ISREG(buffer.st_mode)) {
       //process regular files that ONLY end in .txt
       if(ends_with_txt(file_path)) {
-        process_file(file_path);
+        process_file(file_path, hash_table);
       }
     }
   }
@@ -79,6 +109,8 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
+  HashTable *hash_table = {0}; //initialized with NULL
+
   //loop through argument(s) and determine if file or directory 
   for(int i = 1; i < argc; i++) {
     struct stat buffer;
@@ -90,11 +122,11 @@ int main(int argc, char *argv[]) {
 
     //if file is directory, we recursively traverse it 
     if(S_ISDIR(buffer.st_mode)) {
-      process_directory(argv[i]);
+      process_directory(argv[i], hash_table);
     }
     //if file is regular, we scan 
     else if(S_ISREG(buffer.st_mode)) {
-      process_file(argv[i]);
+      process_file(argv[i], hash_table);
     }
     //not a regular file nor a directory 
     else {
