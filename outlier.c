@@ -114,6 +114,7 @@ void normalizeWord(char *word)
         word[0] = '\0';
         return;
     }
+
     // Shift characters to front and lowercase
     int i;
     for (i = start; i <= end; i++) {
@@ -122,20 +123,22 @@ void normalizeWord(char *word)
     word[i - start] = '\0';
 
     // Apply required exclusion rules
-    if (word[0] == '(' || word[0] == '[' || word[0] == '{' ||
-        word[0] == '"' || word[0] == '\'') {
-        word[0] = '\0';
-        return;
+
+    //leading punctuation removal 
+    while (word[0] == '(' || word[0] == '[' || word[0] == '{' || word[0] == '"' || word[0] == '\'') 
+    {
+      memmove(word, word + 1, strlen(word));
     }
 
+    //trailing punctuation removal 
     int len = strlen(word);
-    if (len > 0 && (word[len - 1] == ')' || word[len - 1] == ']' ||
+    while (len > 0 && (word[len - 1] == ')' || word[len - 1] == ']' ||
                     word[len - 1] == '}' || word[len - 1] == '"' ||
                     word[len - 1] == '\'' || word[len - 1] == ',' ||
                     word[len - 1] == '.' || word[len - 1] == '!' ||
                     word[len - 1] == '?')) {
-        word[0] = '\0';
-        return;
+        word[len - 1] = '\0';
+        len--;
     }
 }
 
