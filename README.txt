@@ -22,4 +22,5 @@
 2. Words are trimmed properly and deemed valid if they have a letter 
 3. Overall frequencies are correctly calculated 
 4. Outliers are correctly identified and ties are broken lexicographically 
-5. Stress testing with a large file  
+5. Stress testing with a large file
+6. Making sure that when directory is passed as an argument, all ".txt" files are processed and files begining with "." are ignored.
