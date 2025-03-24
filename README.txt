@@ -18,4 +18,8 @@
     c. for ties, lexicograaphically first word is selected
 
 # Testing Strategy 
-1. 
+1. Ensuring that directories are fully traversed 
+2. Words are trimmed properly and deemed valid if they have a letter 
+3. Overall frequencies are correctly calculated 
+4. Outliers are correctly identified and ties are broken lexicographically 
+5. Stress testing with a large file  
